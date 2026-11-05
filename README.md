@@ -1,16 +1,19 @@
+
 # BookCLI
 
 BookCLI is a Node.js command-line application for searching books using the Open Library API and managing a personal reading list.
 
 ## Features
 
-- Search for books by title.
-- Limit the number of search results.
-- Save books to a reading list.
-- View saved books.
-- Remove books from the reading list.
+- Search for books by title or keyword.
+- Limit the number of displayed search results.
+- View book titles, authors, and publication years.
+- Save selected books to a personal reading list.
+- View all saved books.
+- Remove books using their ISBN, Open Library ID, or exact title.
 - Store saved books locally in a JSON file.
-- Display colored messages and helpful error messages.
+- Display colored terminal messages and helpful error messages.
+- Validate command-line arguments.
 
 ## Requirements
 
@@ -32,57 +35,67 @@ Install dependencies:
 npm install
 ```
 
-Link the CLI command:
+Link the CLI command globally:
 
 ```bash
 npm link
 ```
 
+On Windows PowerShell, use `bookcli.cmd` if the `bookcli` command is blocked by script execution policy.
+
 ## Usage
 
-Display help:
+### Display help
 
 ```bash
 bookcli help
 ```
 
-Search for books:
+### Search for books
 
 ```bash
 bookcli search harry potter
 ```
 
-Limit search results:
+### Limit search results
 
 ```bash
 bookcli search --limit 5 harry potter
 ```
 
-Save a book using its ID:
+You can also use the short option:
 
 ```bash
-bookcli save BOOK_ID
+bookcli search -l 5 harry potter
 ```
 
-View your reading list:
+### Save a book
+
+Search by title and select a book from the displayed results:
+
+```bash
+bookcli save harry potter
+```
+
+### View your reading list
 
 ```bash
 bookcli list
 ```
 
-Remove a saved book:
+### Remove a saved book
+
+Use the book's ISBN, Open Library ID, or exact title:
 
 ```bash
-bookcli remove BOOK_ID
+bookcli remove "Harry Potter"
 ```
-
-On Windows PowerShell, use `bookcli.cmd` if the `bookcli` command is blocked by script execution policy.
 
 ## Technologies
 
 - Node.js
 - JavaScript
-- Open Library API
+- Open Library Search API
 - JSON file storage
 - Chalk for colored terminal output
 - Node.js `util.parseArgs` for command-line argument parsing
@@ -100,16 +113,32 @@ book-cli/
 ├── data/
 │   └── books.json
 ├── package.json
+├── package-lock.json
 ├── README.md
 └── .gitignore
 ```
 
 ## API
 
-BookCLI uses the Open Library API to retrieve book information.
+BookCLI retrieves book information using the Open Library Search API:
+
+https://openlibrary.org/search.json
+
+Open Library API documentation:
 
 https://openlibrary.org/developers/api
 
-## Team
+## Data Storage
 
-BookCLI is a collaborative Node.js CLI project.
+Saved books are stored locally in:
+
+`data/books.json`
+
+## Contributors
+
+- Emerance Himbazwe
+- Thressy Ange Isimbi Sebera
+
+## License
+
+MIT License
