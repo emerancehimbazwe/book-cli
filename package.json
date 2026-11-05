@@ -1,0 +1,22 @@
+{
+  "name": "book-cli",
+  "version": "1.0.0",
+  "description": "A command-line book finder and reading list manager",
+  "main": "bin/bookcli.js",
+  "bin": {
+    "bookcli": "./bin/bookcli.js"
+  },
+  "scripts": {
+    "start": "node bin/bookcli.js"
+  },
+  "keywords": [
+    "books",
+    "cli",
+    "open-library"
+  ],
+  "author": "BookCLI Team",
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^4.1.2"
+  }
+}
