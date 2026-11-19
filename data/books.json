@@ -1,1 +1,23 @@
-[]
+[
+  {
+    "title": "Things Fall Apart",
+    "author": "Chinua Achebe",
+    "year": 1958,
+    "isbn": null,
+    "key": "/works/OL891786W"
+  },
+  {
+    "title": "Harry Potter (series) 1-7",
+    "author": "J. K. Rowling",
+    "year": 1999,
+    "isbn": null,
+    "key": "/works/OL14981609W"
+  },
+  {
+    "title": "After (After Series, Book 1)",
+    "author": "Anna Todd",
+    "year": 2014,
+    "isbn": null,
+    "key": "/works/OL17719508W"
+  }
+]

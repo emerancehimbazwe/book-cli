@@ -3,9 +3,22 @@ const readline = require("readline/promises");
 const { searchBooks } = require("./api");
 const { saveBook, listBooks, removeBook } = require("./storage");
 
-async function runCommand() {
-    const args = process.argv.slice(2);
-    const command = args[0];
+function showHelp() {
+    console.log(`
+BookCLI - Book Finder and Reading List Manager
+
+Commands:
+  search <title>    Search for books
+  save <title>      Search and save a selected book
+  list              Display saved books
+  remove <title>    Remove a saved book
+  help              Display available commands
+  exit              Close BookCLI
+    `);
+}
+
+async function executeCommand(args, rl) {
+    const command = args[0]?.toLowerCase();
 
     try {
         switch (command) {
@@ -13,24 +26,26 @@ async function runCommand() {
                 const query = args.slice(1).join(" ");
 
                 if (!query) {
-                    console.log("Usage: npm start -- search <book title>");
-                    return;
+                    console.log("Usage: search <book title>");
+                    break;
                 }
 
                 const books = await searchBooks(query);
 
                 if (books.length === 0) {
                     console.log("No books found.");
-                    return;
+                    break;
                 }
 
                 console.log("\nSearch results:\n");
 
-                books.forEach((book, index) => {
-                    console.log(`${index + 1}. ${book.title}`);
-                    console.log(`   Author: ${book.author}`);
-                    console.log(`   Year: ${book.year}\n`);
-                });
+                console.table(books.map((book, index) => ({
+                    Number: index + 1,
+                    Title: book.title,
+                    Author: book.author,
+                    Year: book.year,
+                    ISBN: book.isbn || "Unavailable"
+                })));
 
                 break;
             }
@@ -39,44 +54,41 @@ async function runCommand() {
                 const query = args.slice(1).join(" ");
 
                 if (!query) {
-                    console.log("Usage: npm start -- save <book title>");
-                    return;
+                    console.log("Usage: save <book title>");
+                    break;
                 }
 
                 const books = await searchBooks(query);
 
                 if (books.length === 0) {
                     console.log("No books found.");
-                    return;
+                    break;
                 }
 
-                books.forEach((book, index) => {
-                    console.log(`${index + 1}. ${book.title} - ${book.author}`);
-                });
+                console.table(books.map((book, index) => ({
+                    Number: index + 1,
+                    Title: book.title,
+                    Author: book.author,
+                    Year: book.year
+                })));
 
-                const rl = readline.createInterface({
-                    input: process.stdin,
-                    output: process.stdout
-                });
+                const answer = await rl.question(
+                    "Enter the number of the book to save: "
+                );
 
-                try {
-                    const answer = await rl.question(
-                        "\nEnter the number of the book to save: "
-                    );
+                const choice = Number(answer);
 
-                    const choice = Number(answer);
-
-                    if (!Number.isInteger(choice) ||
-                        choice < 1 || choice > books.length) {
-                        console.log("Invalid selection.");
-                        return;
-                    }
-
-                    saveBook(books[choice - 1]);
-                    console.log("Book saved successfully!");
-                } finally {
-                    rl.close();
+                if (
+                    !Number.isInteger(choice) ||
+                    choice < 1 ||
+                    choice > books.length
+                ) {
+                    console.log("Invalid selection.");
+                    break;
                 }
+
+                saveBook(books[choice - 1]);
+                console.log("Book saved successfully!");
 
                 break;
             }
@@ -86,17 +98,18 @@ async function runCommand() {
 
                 if (books.length === 0) {
                     console.log("Your reading list is empty.");
-                    return;
+                    break;
                 }
 
                 console.log("\nYour reading list:\n");
 
-                books.forEach((book, index) => {
-                    console.log(`${index + 1}. ${book.title}`);
-                    console.log(`   Author: ${book.author}`);
-                    console.log(`   Year: ${book.year}`);
-                    console.log(`   ISBN: ${book.isbn || "Unavailable"}\n`);
-                });
+                console.table(books.map((book, index) => ({
+                    Number: index + 1,
+                    Title: book.title,
+                    Author: book.author,
+                    Year: book.year,
+                    ISBN: book.isbn || "Unavailable"
+                })));
 
                 break;
             }
@@ -105,8 +118,8 @@ async function runCommand() {
                 const identifier = args.slice(1).join(" ");
 
                 if (!identifier) {
-                    console.log("Usage: npm start -- remove <ISBN or title>");
-                    return;
+                    console.log("Usage: remove <ISBN or title>");
+                    break;
                 }
 
                 const removed = removeBook(identifier);
@@ -120,19 +133,57 @@ async function runCommand() {
                 break;
             }
 
-            default:
-                console.log(`
-BookCLI - Book Finder and Reading List Manager
+            case "help":
+                showHelp();
+                break;
 
-Commands:
-  npm start -- search <title>  Search for books
-  npm start -- save <title>    Search and save a selected book
-  npm start -- list            Display saved books
-  npm start -- remove <ISBN>   Remove a saved book
-                `);
+            case "exit":
+                return false;
+
+            default:
+                console.log("Unknown command. Type help to see available commands.");
         }
     } catch (error) {
         console.error("Error:", error.message);
+    }
+
+    return true;
+}
+
+async function runCommand() {
+    const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout
+    });
+
+    try {
+        console.log("\nWelcome to BookCLI!");
+        console.log("Type help to see commands or exit to close.\n");
+
+        while (true) {
+            const input = await rl.question("BookCLI > ");
+
+            if (!input.trim()) {
+                continue;
+            }
+
+            const args = input.trim().split(/\s+/);
+
+            const shouldContinue = await executeCommand(args, rl);
+
+            if (!shouldContinue) {
+                console.log("Goodbye!");
+                break;
+            }
+
+            console.log("");
+        }
+    } catch (error) {
+        if (error.code !== "ERR_USE_AFTER_CLOSE") {
+            console.error("Error:", error.message);
+        }
+    } finally {
+        rl.close();
     }
 }
 
